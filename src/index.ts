@@ -1,5 +1,6 @@
 import { vCanvas, CameraUpdateEvent, InteractiveUIPolygonComponent } from "@niuee/vcanvas";
 import { vDial, DialWheelEvent, Point } from "@niuee/vcanvas";
+import { Polygon } from "@niuee/vphysics";
 
 
 customElements.define('v-canvas', vCanvas);
