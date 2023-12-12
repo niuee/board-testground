@@ -72,20 +72,10 @@ input:checked + .slider:before {
   </style>
   <!-- Add any necessary HTML markup here -->
     <div style="position: relative;">
-      <v-canvas id="test-graph" style="position: absolute; z-index: 1;"  full-screen></v-canvas>
-      <v-dial width="300" style="position: absolute; z-index: 2;"></v-dial>
+      <v-canvas id="test-graph" style="position: absolute; z-index: 1;"  restrict-translation restrict-rotation restrict-zoom full-screen tap-step></v-canvas>
       <div style="position: absolute; left: 10vw; z-index: 2;">
-        <div style="user-select: none;">Mouse Clicked Position in World Coordinate: <span id="clicked-position"></span></div>
-        <div style="user-select: none;">Camera Position in World Coordinate: <span id="camera-position"></span></div>
-        <div style="user-select: none;">Zoom Level: <span id="zoom-level"></span></div>
-        <div style="user-select: none;">Rotation Angle in Degree: <span id="camera-rotation"></span></div>
-        <button id="reset-camera" >Reset Camera</button>
-        <button id="toggle-rotation-wheel" >To Rotate the Camera</button>
-        <button id="restrict-x-translation">Restrict X Translation</button>
-        <label class="switch">
-          <input id="toggle-test" type="checkbox">
-          <span class="slider round"></span>
-        </label>
+        <button id="start-recording" >開始記錄</button>
+        <button id="clear-canvas-button" >清除畫布</button>
       </div>
     </div>
 

@@ -1,88 +1,94 @@
-import { vCanvas, CameraUpdateEvent, InteractiveUIPolygonComponent } from "@niuee/vcanvas";
-import { vDial, DialWheelEvent, Point } from "@niuee/vcanvas";
-import { AnimatableInteractiveUIPolygonComponent } from "../animatableuicomponent";
+import { vCanvas } from "@niuee/vcanvas";
+import { vDial, Point } from "@niuee/vcanvas";
 
 customElements.define('v-canvas', vCanvas);
 customElements.define('v-dial', vDial);
 
 let element = document.getElementById("test-graph") as vCanvas;
-let button = document.querySelector("#reset-camera") as HTMLButtonElement;
-let restrictXTranslationButton = document.querySelector("#restrict-x-translation") as HTMLButtonElement;
-let dialWheel = document.querySelector("v-dial") as vDial;
-let positionText = document.querySelector("#clicked-position");
-let zoomLevelText = document.querySelector("#zoom-level");
-let cameraPositionText = document.querySelector("#camera-position");
-let cameraRotationText = document.querySelector("#camera-rotation");
-let toggleTest = document.querySelector("#toggle-test") as HTMLInputElement;
-
-if(toggleTest){
-    toggleTest.onchange = (e) =>{
-        dialWheel.style.visibility = toggleTest.checked ? "visible" : "hidden";
-    }
-}
-
+let button = document.querySelector("#start-recording") as HTMLButtonElement;
+let clearCanvasbutton = document.querySelector("#clear-canvas-button") as HTMLButtonElement;
+let recording = false;
+let startTime = 0;
+let curTime = 0;
+let pathPoints: PathPoint[] = [];
+let recordedPath: PathPoint[] = [];
 if (button) {
-    button.onclick = (e) => element.resetCamera();
+    button.onclick = ()=>{
+        if(recording){
+            console.log("recorder path", recordedPath);
+        }
+        startTime = curTime;
+        recordedPath = [];
+        recording = !recording;
+    }
+}
+if(clearCanvasbutton){
+    clearCanvasbutton.onclick = ()=>{
+        pathPoints = [];
+    }
 }
 
-if (restrictXTranslationButton) {
-    restrictXTranslationButton.onclick = (e) => {
-        element.setAttribute("restrict-relative-x-translation", "true")
-    };
-}
-if(dialWheel && element){
-    const dialWheelHalfHeight = dialWheel.clientHeight / 2;
-    const dialWheelHalfWidth = dialWheel.clientWidth / 2;
-    const canvasCenterX = element.getBoundingClientRect().left + element.clientWidth / 2;
-    const canvasCenterY = element.getBoundingClientRect().top + element.clientHeight / 2;
-    let topValue = canvasCenterY - dialWheelHalfHeight;
-    let leftValue = canvasCenterX - dialWheelHalfWidth;
-    console.log("top", topValue);
-    console.log("left", leftValue);
-    dialWheel.style.top = topValue.toString() + "px";
-    dialWheel.style.left = leftValue.toString() + "px";
-    dialWheel.style.visibility = "hidden";
+let isDrawing = false;
+let hue = 0;
+let lastPoint: Point = undefined;
+type PathPoint = {
+    startPoint: Point;
+    endPoint: Point;
+    strokeStyle: string;
+    timePercentage: number;
 }
 
-dialWheel.addEventListener('needleslide', (evt: Event)=>{
-    let dialEvent = evt as DialWheelEvent;
-    let angleSpan = dialEvent.detail.angleSpan;
-    element.spinCameraWithAnimation(angleSpan);
+element.addEventListener('touchstart', (e)=>{
+    isDrawing = true;
+    lastPoint = element.convertWindowPoint2WorldCoord({x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY});
 });
 
-dialWheel.addEventListener('needlechange', (evt: Event)=>{
-    let dialEvent = evt as DialWheelEvent;
-    let angleSpan = dialEvent.detail.angleSpan;
-    element.setCameraAngle(angleSpan);
+element.addEventListener('touchend', (e)=>{
+    isDrawing = false;
 });
 
-element.addEventListener('cameraupdate', (evt: Event)=>{
-    let cameraUpdateEvent = evt as CameraUpdateEvent;
-    let cameraInfo = cameraUpdateEvent.detail;
-    dialWheel.linkRotation(cameraInfo.cameraAngle);
-    if(zoomLevelText !== null){
-        zoomLevelText.innerHTML = `${cameraInfo.cameraZoomLevel.toFixed(2)}`;
-    }
-    if(cameraPositionText !== null){
-        cameraPositionText.innerHTML = `x: ${cameraInfo.cameraPosition.x.toFixed(2)} y: ${cameraInfo.cameraPosition.y.toFixed(2)}`;
-    }
-    if(cameraRotationText !== null){
-        cameraRotationText.innerHTML = `${(cameraInfo.cameraAngle * 180 / Math.PI).toFixed(2)}`;
+element.addEventListener('touchcancel', (e)=>{
+    isDrawing = false;
+});
+
+element.addEventListener('touchmove', (e)=>{
+    if(e.targetTouches.length == 1 && isDrawing){
+        let curPoint = element.convertWindowPoint2WorldCoord({x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY});
+        pathPoints.push({
+            startPoint: {...lastPoint},
+            endPoint: {...curPoint},
+            strokeStyle: `hsl(${hue}, 60%, 60%)`,
+            timePercentage: 0
+        })
+        // Array destructuring
+        if (recording){
+            recordedPath.push({
+                startPoint: {...lastPoint},
+                endPoint: {...curPoint},
+                strokeStyle: `hsl(${hue}, 60%, 60%)`,
+                timePercentage: curTime - startTime,
+            })
+        }
+        lastPoint = curPoint;
+        hue = (hue + 1) % 360;
     }
 });
 
-element.addEventListener('pointerdown', (e)=>{
-    const clickedPoint = element.convertWindowPoint2WorldCoord({x: e.clientX, y: e.clientY});
-    // console.log("clicked point", clickedPoint);
-    if(positionText !== null){
-        positionText.innerHTML = `x: ${clickedPoint.x.toFixed(2)} y: ${clickedPoint.y.toFixed(2)}`;
-    }
-});
-let testPolygon = new AnimatableInteractiveUIPolygonComponent({x: 100, y: 100}, [{x: 50, y: 50}, {x: -50, y: 50}, {x: -50, y: -50}, {x: 50, y: -50}], 45 * Math.PI / 180);
+const canvasStepFunction = element.getStepFunction();
+const ctx = element.getContext();
+function step(timestamp: number){
+    canvasStepFunction(timestamp);
+    curTime = timestamp;
+    pathPoints.forEach((point)=>{
+        ctx.strokeStyle = point.strokeStyle;
+        ctx.beginPath();
+        // start from
+        ctx.moveTo(point.startPoint.x, -point.startPoint.y);
+        // go to
+        ctx.lineTo(point.endPoint.x, -point.endPoint.y);
+        ctx.stroke();
+    });
+    window.requestAnimationFrame(step);
+}
 
-
-const raycastCallback = (position: Point)=>{
-    element.getCamera().lockOnto(testPolygon);
-};
-testPolygon.setRayCastCallback(raycastCallback);
-element.insertUIComponent(testPolygon);
+window.requestAnimationFrame(step);
