@@ -1,7 +1,6 @@
 import { vCanvas, CameraUpdateEvent, InteractiveUIPolygonComponent } from "@niuee/vcanvas";
 import { vDial, DialWheelEvent, Point } from "@niuee/vcanvas";
-import { Polygon } from "@niuee/vphysics";
-
+import { AnimatableInteractiveUIPolygonComponent } from "./animatableuicomponent";
 
 customElements.define('v-canvas', vCanvas);
 customElements.define('v-dial', vDial);
@@ -79,12 +78,11 @@ element.addEventListener('pointerdown', (e)=>{
         positionText.innerHTML = `x: ${clickedPoint.x.toFixed(2)} y: ${clickedPoint.y.toFixed(2)}`;
     }
 });
+let testPolygon = new AnimatableInteractiveUIPolygonComponent({x: 100, y: 100}, [{x: 50, y: 50}, {x: -50, y: 50}, {x: -50, y: -50}, {x: 50, y: -50}], 45 * Math.PI / 180);
 
-
-let testPolygon = new InteractiveUIPolygonComponent({x: 100, y: 100}, [{x: 50, y: 50}, {x: -50, y: 50}, {x: -50, y: -50}, {x: 50, y: -50}], 45 * Math.PI / 180);
 
 const raycastCallback = (position: Point)=>{
-    element.getCamera().lockOntoWithTransition(testPolygon);
+    element.getCamera().lockOnto(testPolygon);
 };
 testPolygon.setRayCastCallback(raycastCallback);
 element.insertUIComponent(testPolygon);
