@@ -2,7 +2,6 @@ import { InteractiveUIComponent, vCanvas, UIComponent } from "@niuee/vcanvas";
 import { CompositeBCurve, ControlPoint } from "./cbCurve";
 import { Point, PointCal } from "point2point";
 
-
 type Identifier = {
     index: number;
     type: "CP" | "LH" | "RH";
@@ -167,6 +166,11 @@ if(dragButton){
     dragButton.onclick = ()=>{
         appendNewControlPoint = false;
         dragControlPoint = !dragControlPoint;
+        if(dragControlPoint){
+            element.getCamera().lockTranslationFromGesture();
+        } else {
+            element.getCamera().releaseLockOnTranslationFromGesture();
+        }
     }
 }
 element.addEventListener('pointerdown', (e)=>{
