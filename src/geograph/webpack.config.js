@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
+const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
+
 
 module.exports = [
 {
@@ -34,7 +36,8 @@ module.exports = [
             inject: 'body',
             path: path.resolve(__dirname, '../../dist/geograph/'),// Output directory
             publicPath: "/"
-        })
+        }),
+        new LicenseWebpackPlugin()
     ],
     devServer: {
         static: path.resolve(__dirname, '../../dist/geograph/'), // Specify the directory for serving static files
