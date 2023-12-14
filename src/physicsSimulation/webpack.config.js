@@ -5,7 +5,7 @@ const nodeExternals = require('webpack-node-externals');
 module.exports = [
 {
     mode: "development",
-    entry: path.resolve(__dirname, './physicsSimulation.ts'),
+    entry: {index: path.resolve(__dirname, './physicsSimulation.ts'), physicsWorker: path.resolve(__dirname, './physicsSimulationWorker.ts')},
     module: {
       rules: [
         {
@@ -23,11 +23,12 @@ module.exports = [
       extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-      filename: 'bundled.js',
+      filename: '[name].js',
       path: path.resolve(__dirname, '../../dist/physicsSimulation/'),
     },
     plugins: [
         new HtmlWebpackPlugin({
+            chunks: ['index'],
             template: "src/physicsSimulation/html/index.html",
             filename: 'index.html',
             inject: 'body',

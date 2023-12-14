@@ -10,28 +10,6 @@ type Identifier = {
 customElements.define('v-canvas', vCanvas);
 
 let element = document.getElementById("test-graph") as vCanvas;
-let button = document.getElementById("start-appending") as HTMLButtonElement;
-let dragButton = document.getElementById("start-dragging") as HTMLButtonElement;
-let appendNewControlPoint = false;
-let dragControlPoint = false;
-let dragPoint: Identifier | undefined = undefined;
-if(button){
-    button.onclick = ()=>{
-        dragControlPoint = false;
-        appendNewControlPoint = !appendNewControlPoint;
-    }
-}
-if(dragButton){
-    dragButton.onclick = ()=>{
-        appendNewControlPoint = false;
-        dragControlPoint = !dragControlPoint;
-        if(dragControlPoint){
-            element.getCamera().lockTranslationFromGesture();
-        } else {
-            element.getCamera().releaseLockOnTranslationFromGesture();
-        }
-    }
-}
 let keyController: Map<string, boolean>;
 keyController = new Map<string, boolean>();
 
@@ -56,9 +34,9 @@ window.addEventListener('keyup', (e)=>{
 
 
 let world = new World(25000, 25000);
-for (let index = 0; index < 3; index++){
+for (let index = 0; index < 1000; index++){
     let vertices = [{x: 10, y: 10}, {x: -10, y: 10}, {x: -10, y: -10}, {x: 10, y: -10}];
-    world.addRigidBody(index.toString(), new Polygon(getRandomPoint(-50, 50), vertices));
+    world.addRigidBody(index.toString(), new Polygon(getRandomPoint(-25000, 25000), vertices));
 }
 
 const canvasStepFn = element.getStepFunction();
@@ -79,7 +57,9 @@ function step(timestamp: number){
     if(keyController.get("KeyD")){
         rigidBodies[0].applyForceInOrientation({x: 0, y: -10000});
     }
+    console.time();
     world.step(0.016);
+    console.timeEnd();
     world.getRigidBodyList().forEach((body)=>{
         let polygon = body as Polygon;
         let vertices = polygon.getVerticesAbsCoord();
@@ -114,3 +94,5 @@ function getRandomPoint(min: number, max: number): Point{
     return {x: getRandom(min, max), y: getRandom(min, max)};
 }
 
+
+// let worker = new Worker("./physicsWorker.js");
