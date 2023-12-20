@@ -1,5 +1,5 @@
 import { InteractiveUIComponent, vCanvas, UIComponent } from "@niuee/vcanvas";
-import { CompositeBCurve, ControlPoint } from "./cbCurve";
+import { CompositeBCurve, ControlPoint } from "@niuee/bcurve";
 import { Point, PointCal } from "point2point";
 
 type Identifier = {
