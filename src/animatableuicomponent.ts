@@ -1,6 +1,6 @@
 import { PointCal, Point } from "point2point";
 import { InteractiveUIComponent, CameraLockableObject } from "@niuee/vcanvas";
-import { AnimationGroup, Keyframe, AnimationSequence, PointAnimationHelper, easeInOutSine} from "@niuee/vanimation";
+import { AnimationGroupLegacy, Keyframe, AnimationSequenceLegacy, PointAnimationHelper} from "@niuee/vanimation";
 
 export class AnimatableInteractiveUIPolygonComponent implements InteractiveUIComponent, CameraLockableObject{
 
@@ -8,7 +8,7 @@ export class AnimatableInteractiveUIPolygonComponent implements InteractiveUICom
     private rotation: number;
     private vertices: Point[];
     private raycastCallback: Function;
-    private animator: AnimationGroup;
+    private animator: AnimationGroupLegacy;
 
     constructor(center: Point, vertices: Point[] = [], rotation: number = 0, raycaseCallback: Function = ()=>{console.log("default raycast callback")}){
         this.position = center;
@@ -17,12 +17,12 @@ export class AnimatableInteractiveUIPolygonComponent implements InteractiveUICom
         this.raycastCallback = raycaseCallback;
         
         let keyframes: Keyframe<Point>[] = [{percentage: 0, value: {x: 100, y: 100}}, {percentage: 1, value: {x: 200, y: 200}}];
-        let animationSequence: AnimationSequence<Point> = {
+        let animationSequence: AnimationSequenceLegacy<Point> = {
             keyframes: keyframes,
             animatableAttributeHelper: new PointAnimationHelper(),
             applyAnimationValue: this.setPosition.bind(this)
         }
-        this.animator = new AnimationGroup([animationSequence], 2, false);
+        this.animator = new AnimationGroupLegacy([animationSequence], 2, false);
 
     }
 

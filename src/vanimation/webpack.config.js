@@ -7,9 +7,15 @@ const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlu
 module.exports = [
 {
     mode: "development",
+    devtool: "source-map",
     entry: {index: path.resolve(__dirname, './vanimation.ts')},
     module: {
       rules: [
+        {
+          test: /\.js$/,
+          enforce: "pre",
+          use: ["source-map-loader"],
+        },
         {
           test: /\.tsx?$/,
           use: 'ts-loader',
@@ -19,6 +25,14 @@ module.exports = [
             test: /\.css$/i,
             use: ["style-loader", "css-loader"],
         },
+        {
+          test: /\.html$/i,
+          loader: "html-loader",
+        },
+        {
+          test: /\.(png|svg|jpg|jpeg|gif)$/i,
+          type: 'asset/resource',
+        },
       ],
     },
     resolve: {
@@ -27,8 +41,10 @@ module.exports = [
     output: {
       filename: '[name].js',
       path: path.resolve(__dirname, '../../dist/vanimation/'),
+      assetModuleFilename: '[name][ext]'
     },
     plugins: [
+        new LicenseWebpackPlugin(),
         new HtmlWebpackPlugin({
             chunks: ['index'],
             template: "src/vanimation/html/index.html",
@@ -37,7 +53,6 @@ module.exports = [
             path: path.resolve(__dirname, '../../dist/vanimation/'),// Output directory
             publicPath: "/"
         }),
-        new LicenseWebpackPlugin()
     ],
     devServer: {
         static: path.resolve(__dirname, '../../dist/vanimation/'), // Specify the directory for serving static files

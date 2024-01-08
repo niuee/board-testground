@@ -85,4 +85,3 @@ const raycastCallback = (position: Point)=>{
     element.getCamera().lockOnto(testPolygon);
 };
 testPolygon.setRayCastCallback(raycastCallback);
-element.insertUIComponent(testPolygon);
