@@ -1,15 +1,16 @@
-import { vCanvas, vCamera } from "@niuee/vcanvas";
-import { vDial, Point } from "@niuee/vcanvas";
-import { Line } from "@niuee/bcurve";
+import Board from "@niuee/board/boardify";
+// import {Board} from "@niuee/board";
+import vCamera from "@niuee/board/board-camera";
+import { Line } from "@niuee/bend";
 import { Bezier } from "bezier-js";
 
-customElements.define('v-canvas', vCanvas);
-customElements.define('v-dial', vDial);
 
-let element = document.getElementById("test-graph") as vCanvas;
-const canvasStepFn = element.getStepFunction();
-const context = element.getContext();
-const camera = element.getCamera();
+let element = document.getElementById("test-graph") as HTMLCanvasElement;
+let board = new Board(element);
+board.fullScreen = true;
+const canvasStepFn = board.getStepFunction();
+const context = board.getContext();
+const camera = board.getCamera();
 const testCamera = new vCamera();
 const bcurve = new Bezier(0, 0, 100, 100, 200, 100, 300, 0);
 console.log(camera);

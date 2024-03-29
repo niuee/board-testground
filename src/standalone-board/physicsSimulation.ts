@@ -4,12 +4,8 @@ import vCamera, { CameraLockableObject } from "@niuee/board/board-camera";
 import { Point, PointCal } from "point2point";
 import { World, QuadTree, Polygon, Circle, VisaulCircleBody, VisualPolygonBody } from "@niuee/bolt";
 
-
-let element = document.getElementById("test-graph") as HTMLCanvasElement;
-let board = new Board(element);
-board.debugMode = true;
-board.fullScreen = true;
-board.displayGrid = true;
+let canvas = document.querySelector("canvas");
+let board = new Board(canvas);
 let keyController: Map<string, boolean>;
 keyController = new Map<string, boolean>();
 
@@ -32,14 +28,22 @@ window.addEventListener('keyup', (e)=>{
     }
 })
 
-board.on("pan", (event: CameraPanEventPayload, cameraState: CameraState)=>{
-    console.log(event.diff);
-});
 
-board.on("zoom", (event: CameraZoomEventPayload, cameraState: CameraState)=>{
-    // console.log("canvas zoomed");
+board.on("pan", (event: CameraPanEventPayload, cameraState)=>{
+    console.log(cameraState.position);
 });
-
+board.debugMode = true;
+board.alignCoordinateSystem = true;
+board.displayRuler = true;
+board.displayGrid = true;
+board.camera.spinDeg(45);
+// board.displayGrid = true;
+// board.displayRuler = true;
+// board.restrictRelativeXTranslation = true;
+board.fullScreen = true;
+board.height = 500;
+board.setMaxTransHeightAlignedMin(15000);
+board.limitEntireViewPort = true;
 const canvasStepFn = board.getStepFunction();
 const context = board.getContext();
 let world = new World(300, 300);
@@ -64,6 +68,7 @@ const initCameraPos = world.getRigidBodyList()[0].center;
 function step(timestamp: number){
     canvasStepFn(timestamp);
     // console.log(world.getRigidBodyList()[0].center);
+
     let rigidBodies = world.getRigidBodyList();
     if(keyController.get("KeyW")){
         rigidBodies[0].applyForceInOrientation({x: 3000, y: 0});
@@ -103,5 +108,6 @@ function getRandomPoint(min: number, max: number): Point{
     return {x: getRandom(min, max), y: getRandom(min, max)};
 }
 
-
+ 
 // let worker = new Worker("./physicsWorker.js");
+

@@ -1,9 +1,9 @@
 // geojson data compiled from https://www.naturalearthdata.com/
 // geojson data from https://geojson-maps.ash.ms/ https://github.com/AshKyd/geojson-regions
 
-import { utils, mercatorProjection, GeoCoord, orthoProjection } from "@niuee/vgeo";
-import { vCanvas, vCamera } from "@niuee/vcanvas";
-import { Line, Path } from "@niuee/bcurve";
+import { utils, mercatorProjection, GeoCoord, orthoProjection } from "@niuee/border";
+import Board from "@niuee/board/boardify";
+import { Line } from "@niuee/bend";
 import { Point } from "point2point";
 import lowWorld from "../../geojsons/low_world.json";
 
@@ -59,17 +59,20 @@ const worldConvertedCoords: Point[][][] = worldGeoCoords.map((country)=>{
 
 let centerLongitude = 120;
 
-customElements.define('v-canvas', vCanvas);
 
-let element = document.getElementById("test-graph") as vCanvas;
-const stepFunction = element.getStepFunction();
-const ctx = element.getContext();
+let element = document.getElementById("test-graph") as HTMLCanvasElement;
+let board = new Board(element);
+board.fullScreen = true;
+board.debugMode = true;
+board.camera.lockTranslationFromGesture();
+const stepFunction = board.getStepFunction();
+const ctx = board.getContext();
 
 let projectionCenter = {latitude: 23, longitude: 121.5};
 
 function step(timestamp: number){
     stepFunction(timestamp);
-    ctx.lineWidth = 1 / element.getCamera().getZoomLevel();
+    ctx.lineWidth = 1 / board.getCamera().getZoomLevel();
     ctx.strokeStyle = "rgb(0, 0, 0)";
     const worldConvertedOrthoCoords: {clipped: boolean, coord: Point}[][][] = worldGeoCoords.map((country)=>{
         return country.map((polygon)=>{
@@ -107,7 +110,7 @@ function step(timestamp: number){
 }
 
 step(0);
-element.getCamera().setMinZoomLevel(0.00005);
+board.getCamera().setMinZoomLevel(0.00005);
 
 element.addEventListener("wheel", (event)=>{
     if(!event.ctrlKey){

@@ -1,5 +1,5 @@
-import { InteractiveUIComponent, vCanvas, UIComponent } from "@niuee/vcanvas";
-import { CompositeBCurve, ControlPoint } from "@niuee/bcurve";
+import Board from "@niuee/board/boardify";
+import { CompositeBCurve, ControlPoint } from "@niuee/bend";
 import { Point, PointCal } from "point2point";
 
 type Identifier = {
@@ -7,7 +7,7 @@ type Identifier = {
     type: "CP" | "LH" | "RH";
 }
 
-class TestBCurve implements UIComponent{
+class TestBCurve {
 
     private compositeCurve: CompositeBCurve;
     private raycastThreshold: number = 5;
@@ -147,9 +147,12 @@ class TestBCurve implements UIComponent{
     }
 }
 
-customElements.define('v-canvas', vCanvas);
 
-let element = document.getElementById("test-graph") as vCanvas;
+let canvas = document.getElementById("test-graph") as HTMLCanvasElement;
+let element = new Board(canvas);
+element.restrictZoom = true;
+element.restrictRotation = true;
+element.fullScreen = true;
 let button = document.getElementById("start-appending") as HTMLButtonElement;
 let dragButton = document.getElementById("start-dragging") as HTMLButtonElement;
 let testCurve = new TestBCurve();
@@ -173,7 +176,7 @@ if(dragButton){
         }
     }
 }
-element.addEventListener('pointerdown', (e)=>{
+canvas.addEventListener('pointerdown', (e)=>{
     const worldPos = element.convertWindowPoint2WorldCoord({x: e.clientX, y: e.clientY});
     if(appendNewControlPoint){
         testCurve.appendControlPointAt(worldPos);
@@ -184,11 +187,11 @@ element.addEventListener('pointerdown', (e)=>{
     }
 });
 
-element.addEventListener('pointerup', (e)=>{
+canvas.addEventListener('pointerup', (e)=>{
     dragPoint = undefined;
 });
 
-element.addEventListener('pointermove', (e)=>{
+canvas.addEventListener('pointermove', (e)=>{
     const worldPos = element.convertWindowPoint2WorldCoord({x: e.clientX, y: e.clientY});
 
     if(dragPoint){

@@ -1,8 +1,8 @@
-import { InteractiveUIComponent, vCanvas, UIComponent } from "@niuee/vcanvas";
+import Board from "@niuee/board/boardify";
 import { Point, PointCal } from "point2point";
-import {EasingFunctions, AnimationGroup, AnimationSequence, Keyframe, NumberAnimationHelper, AnimatableAttributeHelper}from "@niuee/vanimation";
-import { Animator, Animation, CompositeAnimation } from "@niuee/vanimation";
-import { bCurve } from "@niuee/bcurve";
+import {EasingFunctions, Keyframe, NumberAnimationHelper, AnimatableAttributeHelper}from "@niuee/bounce";
+import { Animator, Animation, CompositeAnimation } from "@niuee/bounce";
+import { bCurve } from "@niuee/bend";
 
 type CurveAnimationAttribute = {
     currentCurvePercentage: number;
@@ -23,11 +23,12 @@ class CurveAttributeHelper implements AnimatableAttributeHelper<CurveAnimationAt
 }
 
 
-customElements.define('v-canvas', vCanvas);
 
-let element = document.getElementById("test-graph") as vCanvas;
+let element = document.getElementById("test-graph") as HTMLCanvasElement;
+let board = new Board(element);
+board.fullScreen = true;
 
-const canvasStepFn = element.getStepFunction();
+const canvasStepFn = board.getStepFunction();
 
 const width = window.innerWidth;
 const height = window.innerHeight;
@@ -35,8 +36,8 @@ const widthHeightRatio = width / height;
 const boxWidth = 2000;
 const boxHeight = boxWidth / widthHeightRatio;
 const boxCenter: Point = {x: -3000, y: 5000};
-const context = element.getContext();
-const camera = element.getCamera();
+const context = board.getContext();
+const camera = board.getCamera();
 
 const clipPathKeyframes: Keyframe<number>[] = [
     {
@@ -109,48 +110,8 @@ let testBCurve = new bCurve(controlPoints);
 
 const numberAnimationHelper = new NumberAnimationHelper();
 let curvePoints: Point[] = [];
-const bezierCurvePathSequence: AnimationSequence<CurveAnimationAttribute> = {
-    duration: 1,
-    keyframes: bezierCurvePathFrames,
-    applyAnimationValue: (value: CurveAnimationAttribute)=>{
-        curvePoints.push(testBCurve.getPointbyPercentage(value.currentCurvePercentage));
-        while(curvePoints.length > value.curveLength){
-            curvePoints.shift();
-        }
-    },
-    animatableAttributeHelper: new CurveAttributeHelper(),
-    easeFn: EasingFunctions.easeInOutSine,
-    setUp: ()=>{
-        curvePoints = [];
-    }
-};
 
-const clipPathSeq: AnimationSequence<number> = {
-    duration: 1,
-    keyframes: clipPathKeyframes,
-    applyAnimationValue: (value: number)=>{
-        radius = value;
-    },
-    animatableAttributeHelper: numberAnimationHelper,
-};
 
-const bezierCurvePathSeq: AnimationSequence<CurveAnimationAttribute> = {
-    duration: 1,
-    keyframes: bezierCurvePathFrames,
-    applyAnimationValue: (value: CurveAnimationAttribute)=>{
-        curvePoints.push(testBCurve.getPointbyPercentage(value.currentCurvePercentage));
-        while(curvePoints.length > value.curveLength){
-            curvePoints.shift();
-        }
-    },
-    animatableAttributeHelper: new CurveAttributeHelper(),
-    easeFn: EasingFunctions.easeInOutSine,
-    setUp: ()=>{
-        curvePoints = [];
-    }
-};
-
-const clipPathAnimation = new AnimationGroup(0, [clipPathSeq, bezierCurvePathSeq], 2, true);
 const pathAnimation = new Animation(bezierCurvePathFrames, 
     (value: CurveAnimationAttribute)=>{
         curvePoints.push(testBCurve.getPointbyPercentage(value.currentCurvePercentage));
@@ -164,7 +125,6 @@ let animationMap = new Map<string, {animator: Animator, startTime: number}>();
 animationMap.set("first", {animator: pathAnimation, startTime: 0});
 animationMap.set("second", {animator: clipPathAnimation2, startTime: 0});
 const composite = new CompositeAnimation(animationMap, true);
-clipPathAnimation.prependBufferTime(1);
 composite.drag(1);
 composite.toggleReverse(true);
 console.log("duration", composite.duration);

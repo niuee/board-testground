@@ -1,4 +1,4 @@
-import { Line } from "@niuee/bcurve";
+import { Line } from "@niuee/bend";
 import { Point } from "point2point";
 
 export class Path {

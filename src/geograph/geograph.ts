@@ -1,9 +1,9 @@
-import { InteractiveUIComponent, vCanvas, UIComponent } from "@niuee/vcanvas";
+import Board from "@niuee/board/boardify";
 import { Point, PointCal } from "point2point";
-import { World, QuadTree, Polygon } from "@niuee/vphysics";
+import { World, QuadTree, Polygon } from "@niuee/bolt";
 import { Path } from "./path";
-import { Line, utils } from "@niuee/bcurve";
-import { NumberAnimationHelper, Keyframe, AnimationSequenceLegacy, AnimationGroupLegacy, AnimatableAttributeHelper} from "@niuee/vanimation";
+import { Line, utils } from "@niuee/bend";
+import { NumberAnimationHelper, Keyframe, AnimatableAttributeHelper} from "@niuee/bounce";
 import data from "../../geojsons/taiwan_onepercent.json";
 import detailedData from "../../geojsons/taiwan.json";
 import traTrack from "../../geojsons/tra-network.json";
@@ -110,38 +110,18 @@ const lines = coords.map((coord, index)=>{
 
 const path = new Path(lines);
 
-const pointAnimationSequence: AnimationSequenceLegacy<PathAnimationAttribute> = {
-    keyframes: pointPathKeyFrames,
-    applyAnimationValue: (value: PathAnimationAttribute)=>{
-        point = path.getPointByPercentage(value.currentCurvePercentage);
-        points.push(point);
-        while(points.length > value.curveLength){
-            points.shift();
-        }
-    },
-    animatableAttributeHelper: new PathAttributeHelper,
-    easeFn: (t: number)=>{
-        return t;
-    },
-    setUp: ()=>{
-        points = [];
-    }
-}
 
-const animationGroup = new AnimationGroupLegacy([pointAnimationSequence], 3, true);
-animationGroup.startAnimation();
-customElements.define('v-canvas', vCanvas);
 
-let element = document.getElementById("test-graph") as vCanvas;
-
-const canvasStepFn = element.getStepFunction();
-const context = element.getContext();
-const camera = element.getCamera();
+let element = document.getElementById("test-graph") as HTMLCanvasElement;
+let board = new Board(element);
+const canvasStepFn = board.getStepFunction();
+const context = board.getContext();
+const camera = board.getCamera();
+board.fullScreen = true;
 let lastUpdateTime = Date.now();
 function step(timestamp: number){
     let cur = Date.now();
     canvasStepFn(timestamp); 
-    animationGroup.animate((cur - lastUpdateTime) / 1000);
     lastUpdateTime = cur; 
     context.beginPath();
 
@@ -211,10 +191,8 @@ document.addEventListener("visibilitychange", tabSwitchingHandler);
 function tabSwitchingHandler(){
     if (document.hidden){
         console.log("Browser tab is hidden");
-        animationGroup.pauseAnimation();
     } else {
         console.log("Browser tab is visible");
         lastUpdateTime = Date.now();
-        animationGroup.resumeAnimation();
     }
 }

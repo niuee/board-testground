@@ -1,10 +1,13 @@
-import { vCanvas } from "@niuee/vcanvas";
-import { vDial, Point } from "@niuee/vcanvas";
+import Board from "@niuee/board/boardify";
+import { Point } from "@niuee/board";
 
-customElements.define('v-canvas', vCanvas);
-customElements.define('v-dial', vDial);
 
-let element = document.getElementById("test-graph") as vCanvas;
+let element = document.getElementById("test-graph") as HTMLCanvasElement;
+let board = new Board(element);
+board.fullScreen = true;
+board.camera.lockTranslationFromGesture();
+board.camera.lockRotationFromGesture();
+board.camera.lockZoomFromGesture();
 let button = document.querySelector("#start-recording") as HTMLButtonElement;
 let clearCanvasbutton = document.querySelector("#clear-canvas-button") as HTMLButtonElement;
 let recording = false;
@@ -40,7 +43,7 @@ type PathPoint = {
 
 element.addEventListener('touchstart', (e)=>{
     isDrawing = true;
-    lastPoint = element.convertWindowPoint2WorldCoord({x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY});
+    lastPoint = board.convertWindowPoint2WorldCoord({x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY});
 });
 
 element.addEventListener('touchend', (e)=>{
@@ -53,7 +56,7 @@ element.addEventListener('touchcancel', (e)=>{
 
 element.addEventListener('touchmove', (e)=>{
     if(e.targetTouches.length == 1 && isDrawing){
-        let curPoint = element.convertWindowPoint2WorldCoord({x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY});
+        let curPoint = board.convertWindowPoint2WorldCoord({x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY});
         pathPoints.push({
             startPoint: {...lastPoint},
             endPoint: {...curPoint},
@@ -74,8 +77,8 @@ element.addEventListener('touchmove', (e)=>{
     }
 });
 
-const canvasStepFunction = element.getStepFunction();
-const ctx = element.getContext();
+const canvasStepFunction = board.getStepFunction();
+const ctx = board.getContext();
 function step(timestamp: number){
     canvasStepFunction(timestamp);
     curTime = timestamp;
